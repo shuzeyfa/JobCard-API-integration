@@ -1,30 +1,36 @@
-"use client"
-import React, {useState,useEffect} from "react";
-import JobCard from "../component/jobCard";
+"use client";
+import React, { useState, useEffect } from "react";
+import JobCard from "../component/jobCard2";
 
-import {jobs} from "../data/data"
+
+import { fetchOpportunities } from "@/lib/fetchOpportunities";
+
+const jobs = await fetchOpportunities();
+
 const criteria = ["Alphabetic", "recent", "start_date"];
-export default function page({params} : {params: {id: string}}) {
 
+export default function page({ params }: { params: { id: string } }) {
+
+  if(jobs.length === 0){
+    return <div>there is no data, Try Again</div>
+  }
+  // console.log(jobs[0])
   const [jobList, setJobs] = useState(jobs);
   const [sorttype, setSortType] = useState(criteria[0]);
-  
 
-  function check(type: string){
-    let sorted = [...jobList]
+  function check(type: string) {
+    let sorted = [...jobList];
     if (type === "Alphabetic") {
       sorted.sort((a, b) => a.title.localeCompare(b.title));
     } else if (type === "start_date") {
       sorted.sort(
         (a, b) =>
-          new Date(a.about.start_date).getTime() -
-          new Date(b.about.start_date).getTime()
+          new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       );
     } else {
       sorted.sort(
         (a, b) =>
-          new Date(a.about.posted_on).getTime() -
-          new Date(b.about.posted_on).getTime()
+          new Date(a.datePosted).getTime() - new Date(b.datePosted).getTime()
       );
     }
 
@@ -34,11 +40,10 @@ export default function page({params} : {params: {id: string}}) {
 
   useEffect(() => {
     let sorted = [...jobs];
-    sorted.sort((a,b) => a.title.localeCompare(b.title));
+    sorted.sort((a, b) => a.title.localeCompare(b.title));
 
     setJobs(sorted);
-  },[]);
-
+  }, []);
 
   return (
     <>
@@ -51,9 +56,10 @@ export default function page({params} : {params: {id: string}}) {
               </span>
               <div className="pr-12">
                 <label className="text-gray-400">sorted by:- </label>
-                <select className="w-[180px] h-[26px]  rounded border-[1px] border-gray-300 gap-[12px] rotate-0 opacity-100"
-                value={sorttype}
-                onChange={(e) => check(e.target.value)}
+                <select
+                  className="w-[180px] h-[26px]  rounded border-[1px] border-gray-300 gap-[12px] rotate-0 opacity-100"
+                  value={sorttype}
+                  onChange={(e) => check(e.target.value)}
                 >
                   {criteria.map((item, index) => (
                     <option key={index}>{item}</option>
@@ -67,7 +73,7 @@ export default function page({params} : {params: {id: string}}) {
             </h2>
           </div>
 
-          {jobList.map((job) => (
+          {jobList.map((job: any) => (
             <JobCard
               key={job.id}
               id={job.id}
@@ -78,7 +84,7 @@ export default function page({params} : {params: {id: string}}) {
               where={job.when_where}
               about={job.about}
               company={job.company}
-              image={job.image}
+              image={job.logoUrl}
             />
           ))}
         </div>
